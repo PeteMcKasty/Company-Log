@@ -97,3 +97,44 @@ function viewAllRoles() {
       startApp();
     });
   }
+
+  // Function to view all employees
+function viewAllEmployees() {
+  const query = `
+    SELECT
+      employees.employee_id,
+      employees.first_name,
+      employees.last_name,
+      roles.title,
+      departments.department_name,
+      roles.salary,
+      CONCAT(managers.first_name, ' ', managers.last_name) AS manager
+    FROM employees
+    INNER JOIN roles ON employees.role_id = roles.role_id
+    INNER JOIN departments ON roles.department_id = departments.department_id
+    LEFT JOIN employees AS managers ON employees.manager_id = managers.employee_id
+  `;
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    startApp();
+  });
+}
+
+// Function to add a department
+function addDepartment() {
+  inquirer
+    .prompt({
+      name: 'departmentName',
+      type: 'input',
+      message: 'Enter the name of the department:',
+    })
+    .then((answer) => {
+      const query = 'INSERT INTO departments SET ?';
+      connection.query(query, { department_name: answer.departmentName }, (err) => {
+        if (err) throw err;
+        console.log('Department added successfully.');
+        startApp();
+      });
+    });
+}
