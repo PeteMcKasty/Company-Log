@@ -186,3 +186,100 @@ function addRole() {
       });
   });
 }
+
+// Function to add an employee
+function addEmployee() {
+  // Retrieve the list of roles from the database to present as choices
+  const query = 'SELECT * FROM roles';
+  connection.query(query, (err, roles) => {
+    if (err) throw err;
+
+    inquirer
+      .prompt([
+        {
+          name: 'firstName',
+          type: 'input',
+          message: "Enter the employee's first name:",
+        },
+        {
+          name: 'lastName',
+          type: 'input',
+          message: "Enter the employee's last name:",
+        },
+        {
+          name: 'roleId',
+          type: 'list',
+          message: "Select the employee's role:",
+          choices: roles.map((role) => ({
+            name: role.title,
+            value: role.role_id,
+          })),
+        },
+        {
+          name: 'managerId',
+          type: 'number',
+          message: "Enter the employee's manager ID (if applicable):",
+        },
+      ])
+      .then((answers) => {
+        const query = 'INSERT INTO employees SET ?';
+        connection.query(
+          query,
+          {
+            first_name: answers.firstName,
+            last_name: answers.lastName,
+            role_id: answers.roleId,
+            manager_id: answers.managerId || null,
+          },
+          (err) => {
+            if (err) throw err;
+            console.log('Employee added successfully.');
+            startApp();
+          }
+        );
+      });
+  });
+}
+
+// Function to update an employee role
+function updateEmployeeRole() {
+  // Retrieve the list of employees from the database to present as choices
+  const query = 'SELECT * FROM employees';
+  connection.query(query, (err, employees) => {
+    if (err) throw err;
+
+    inquirer
+      .prompt([
+        {
+          name: 'employeeId',
+          type: 'list',
+          message: 'Select the employee to update:',
+          choices: employees.map((employee) => ({
+            name: `${employee.first_name} ${employee.last_name}`,
+            value: employee.employee_id,
+          })),
+        },
+        {
+          name: 'newRoleId',
+          type: 'list',
+          message: 'Select the new role for the employee:',
+          choices: roles.map((role) => ({
+            name: role.title,
+            value: role.role_id,
+          })),
+        },
+      ])
+      .then((answers) => {
+        const query = 'UPDATE employees SET role_id = ? WHERE employee_id = ?';
+        connection.query(
+          query,
+          [answers.newRoleId, answers.employeeId],
+          (err) => {
+            if (err) throw err;
+            console.log('Employee role updated successfully.');
+            startApp();
+          }
+        );
+      });
+  });
+}
