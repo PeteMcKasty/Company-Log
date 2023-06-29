@@ -1,3 +1,4 @@
+const fs = require('fs');
 const mysql = require('mysql');
 const inquirer = require('inquirer');
 
@@ -12,10 +13,29 @@ const connection = mysql.createConnection({
 
 // Connect to the database
 connection.connect((err) => {
+  if (err) throw err;
+  console.log('Connected to the database.');
+  executeSchemaSQL();
+});
+
+// Execute the schema.sql file
+function executeSchemaSQL() {
+  const schemaPath = './db/schema.sql'; // Path to the schema.sql file
+
+  // Read the schema.sql file
+  fs.readFile(schemaPath, 'utf8', (err, data) => {
     if (err) throw err;
-    console.log('Connected to the database.');
-    startApp();
+
+    // Execute the SQL queries in the schema.sql file
+    connection.query(data, (err) => {
+      if (err) throw err;
+      console.log('Schema SQL executed successfully.');
+
+      // Start the application after executing the schema.sql
+      startApp();
+    });
   });
+}
 
   // Function to start the application
 function startApp() {
@@ -244,12 +264,16 @@ function addEmployee() {
 // Function to update an employee role
 function updateEmployeeRole() {
   // Retrieve the list of employees from the database to present as choices
-  const query = 'SELECT * FROM employees';
-  connection.query(query, (err, employees) => {
+  const employeeQuery = 'SELECT * FROM employees';
+  connection.query(employeeQuery, (err, employees) => {
     if (err) throw err;
 
-    inquirer
-      .prompt([
+    // Retrieve the list of roles from the database to present as choices
+    const roleQuery = 'SELECT * FROM roles';
+    connection.query(roleQuery, (err, roles) => {
+      if (err) throw err;
+
+      inquirer.prompt([
         {
           name: 'employeeId',
           type: 'list',
@@ -282,4 +306,5 @@ function updateEmployeeRole() {
         );
       });
   });
+  })
 }

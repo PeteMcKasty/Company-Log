@@ -1,0 +1,16 @@
+{
+    "name": "employee-management-app",
+    "version": "1.0.0",
+    "description": "An employee management application using MySQL and JavaScript",
+    "main": "server.js",
+    "scripts": {
+      "start": "node index.js"
+    },
+    "author": "Your Name",
+    "license": "MIT",
+    "dependencies": {
+      "mysql": "^2.18.1",
+      "inquirer": "^8.2.4",
+      "fs": "0.0.1-security"
+    }
+  }
